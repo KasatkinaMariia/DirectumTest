@@ -1,0 +1,25 @@
+WITH ProductsQuantity as
+(SELECT IDProd, Name as ProdName, SUM(Quantity) as ProdQuantity
+FROM Products
+JOIN Sales
+ON Products.ID = Sales.IDProd
+WHERE Sales.Date between '2013-10-01' and '2013-10-07'
+GROUP BY IDProd, Name)
+
+SELECT ProdName as "Наименование продукции", 
+       (Surname + ' ' + Name) as "Фамилия и имя сотрудника", 
+       ROUND( SUM(Sales.Quantity) / ProductsQuantity.ProdQuantity, 2)*100 as "Процент продаж сотрудником данного вида продукции"
+FROM Sellers
+JOIN Sales
+ON Sellers.ID = Sales.IDSel
+JOIN ProductsQuantity
+ON ProductsQuantity.IDProd = Sales.IDProd
+WHERE Sales.Date between '2013-10-01' and '2013-10-07'
+AND ProductsQuantity.IdProd in (SELECT ProductsQuantity.IDProd
+				FROM ProductsQuantity
+				JOIN Arrivals
+				ON Arrivals.IDProd = ProductsQuantity.IDProd
+				WHERE Arrivals.Date between '2013-09-07' and '2013-10-07')
+
+GROUP BY ProdName, (Surname + ' ' + Name), ProductsQuantity.ProdQuantity
+ORDER BY 1, 2
